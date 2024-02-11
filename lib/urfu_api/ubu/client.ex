@@ -1,7 +1,7 @@
-defmodule UrfuApi.UBU.Client do
+defmodule UrfuApi.Ubu.Client do
   @moduledoc false
 
-  alias UrfuApi.UBU.Auth.Token
+  alias UrfuApi.Ubu.Auth.Token
 
   @url "https://sso.urfu.ru/adfs/OAuth2/authorize?client_id=https%3A%2F%2Fubu.urfu.ru%2Ffse&redirect_uri=https%3A%2F%2Fubu.urfu.ru%2Ffse&resource=https%3A%2F%2Fubu.urfu.ru%2Ffse&response_type=code&state=e30"
   @rpc_url "https://ubu.urfu.ru/fse/api/rpc"

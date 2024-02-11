@@ -1,7 +1,7 @@
-defmodule UrfuApi.IStudent.Client do
+defmodule UrfuApi.Istudent.Client do
   @moduledoc false
 
-  alias UrfuApi.IStudent
+  alias UrfuApi.Istudent
 
   @url "https://sso.urfu.ru/adfs/OAuth2/authorize?resource=https%3A%2F%2Fistudent.urfu.ru&type=web_server&client_id=https%3A%2F%2Fistudent.urfu.ru&redirect_uri=https%3A%2F%2Fistudent.urfu.ru%3Fauth&response_type=code&scope="
 
@@ -21,7 +21,7 @@ defmodule UrfuApi.IStudent.Client do
 
   @brs_url "https://istudent.urfu.ru/s/http-urfu-ru-ru-students-study-brs"
 
-  @spec request_brs!(IStudent.Auth.Token.t(), discipline: integer()) :: term()
+  @spec request_brs!(Istudent.Auth.Token.t(), discipline: integer()) :: term()
   def request_brs!(token, options \\ []) do
     path =
       if discipline_id = Keyword.get(options, :discipline) do

@@ -1,9 +1,9 @@
-defmodule UrfuApi.IStudent.BRS do
+defmodule UrfuApi.Istudent.BRS do
   @moduledoc false
-  alias UrfuApi.IStudent.Auth.Token
-  alias UrfuApi.IStudent.BRS.Subject
-  alias UrfuApi.IStudent.BRS.SubjectScore
-  alias UrfuApi.IStudent.Client
+  alias UrfuApi.Istudent.Auth.Token
+  alias UrfuApi.Istudent.BRS.Subject
+  alias UrfuApi.Istudent.BRS.SubjectScore
+  alias UrfuApi.Istudent.Client
 
   @spec get_subjects(Token.t()) :: [Subject.t()]
   def get_subjects(auth) do
