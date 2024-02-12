@@ -1,4 +1,4 @@
-defmodule UrfuApi.Istudent.BRS.SubjectScore do
+defmodule UrfuApi.Istudent.Brs.SubjectScore do
   @moduledoc false
   use TypedStruct
   use ExConstructor
