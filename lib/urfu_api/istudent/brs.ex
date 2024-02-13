@@ -15,7 +15,7 @@ defmodule UrfuApi.Istudent.Brs do
   defp parse_subjects(body) do
     body
     |> Floki.parse_document!()
-    |> Floki.find(".study-in-subjects>a")
+    |> Floki.find("a.rating-discipline")
     |> Enum.map(&parse_subject/1)
   end
 
