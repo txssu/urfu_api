@@ -1,4 +1,4 @@
-defmodule UrfuApi.Modeus.Persons.Person do
+defmodule UrFUAPI.Modeus.Persons.Person do
   @moduledoc false
   use TypedStruct
   use ExConstructor

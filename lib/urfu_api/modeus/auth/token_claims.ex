@@ -1,4 +1,4 @@
-defmodule UrfuApi.Modeus.Auth.TokenClaims do
+defmodule UrFUAPI.Modeus.Auth.TokenClaims do
   @moduledoc false
   use TypedStruct
   use ExConstructor

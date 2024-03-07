@@ -1,8 +1,8 @@
-defmodule UrfuApi.Modeus.Auth do
+defmodule UrFUAPI.Modeus.Auth do
   @moduledoc false
-  alias UrfuApi.AuthHelpers
-  alias UrfuApi.Modeus
-  alias UrfuApi.Modeus.Auth.Token
+  alias UrFUAPI.AuthHelpers
+  alias UrFUAPI.Modeus
+  alias UrFUAPI.Modeus.Auth.Token
 
   defmodule AuthProcess do
     @moduledoc false

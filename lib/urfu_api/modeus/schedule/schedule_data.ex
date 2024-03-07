@@ -1,25 +1,25 @@
-defmodule UrfuApi.Modeus.Schedule.ScheduleData do
+defmodule UrFUAPI.Modeus.Schedule.ScheduleData do
   @moduledoc false
   use TypedStruct
   use ExConstructor
 
-  alias UrfuApi.Modeus.Schedule.ScheduleData.Building
-  alias UrfuApi.Modeus.Schedule.ScheduleData.CourseUnitRealization
-  alias UrfuApi.Modeus.Schedule.ScheduleData.CycleRealization
-  alias UrfuApi.Modeus.Schedule.ScheduleData.Duration
-  alias UrfuApi.Modeus.Schedule.ScheduleData.EducationalObject
-  alias UrfuApi.Modeus.Schedule.ScheduleData.Event
-  alias UrfuApi.Modeus.Schedule.ScheduleData.EventAttendance
-  alias UrfuApi.Modeus.Schedule.ScheduleData.EventAttendee
-  alias UrfuApi.Modeus.Schedule.ScheduleData.EventLocation
-  alias UrfuApi.Modeus.Schedule.ScheduleData.EventOrganizer
-  alias UrfuApi.Modeus.Schedule.ScheduleData.EventRoom
-  alias UrfuApi.Modeus.Schedule.ScheduleData.LessonRealization
-  alias UrfuApi.Modeus.Schedule.ScheduleData.LessonRealizationTeam
-  alias UrfuApi.Modeus.Schedule.ScheduleData.Person
-  alias UrfuApi.Modeus.Schedule.ScheduleData.PersonMidCheckResult
-  alias UrfuApi.Modeus.Schedule.ScheduleData.PersonResult
-  alias UrfuApi.Modeus.Schedule.ScheduleData.Room
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.Building
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.CourseUnitRealization
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.CycleRealization
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.Duration
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.EducationalObject
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.Event
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.EventAttendance
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.EventAttendee
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.EventLocation
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.EventOrganizer
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.EventRoom
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.LessonRealization
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.LessonRealizationTeam
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.Person
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.PersonMidCheckResult
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.PersonResult
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.Room
 
   typedstruct enforce: true do
     field :buildings, [Building.t()]

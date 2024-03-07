@@ -1,8 +1,8 @@
-defmodule UrfuApi.Modeus.Persons do
+defmodule UrFUAPI.Modeus.Persons do
   @moduledoc false
-  alias UrfuApi.Modeus.Auth.Token
-  alias UrfuApi.Modeus.Client
-  alias UrfuApi.Modeus.Persons.Person
+  alias UrFUAPI.Modeus.Auth.Token
+  alias UrFUAPI.Modeus.Client
+  alias UrFUAPI.Modeus.Persons.Person
 
   @spec search_person(Token.t(), String.t()) :: [Person.t()]
   def search_person(auth, fullname) do

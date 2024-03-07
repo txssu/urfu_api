@@ -1,7 +1,7 @@
-defmodule UrfuApi.IStudent.Client do
+defmodule UrFUAPI.IStudent.Client do
   @moduledoc false
 
-  alias UrfuApi.IStudent
+  alias UrFUAPI.IStudent
 
   @url "https://sso.urfu.ru/adfs/OAuth2/authorize?resource=https%3A%2F%2Fistudent.urfu.ru&type=web_server&client_id=https%3A%2F%2Fistudent.urfu.ru&redirect_uri=https%3A%2F%2Fistudent.urfu.ru%3Fauth&response_type=code&scope="
 
@@ -11,12 +11,12 @@ defmodule UrfuApi.IStudent.Client do
 
     encoded_body = URI.encode_query(body)
 
-    UrfuApi.Client.request!(method, @url, headers, encoded_body)
+    UrFUAPI.Client.request!(method, @url, headers, encoded_body)
   end
 
   @spec request_istudent_token!(Finch.Request.url()) :: Finch.Response.t()
   def request_istudent_token!(url) do
-    UrfuApi.Client.request!(:get, url)
+    UrFUAPI.Client.request!(:get, url)
   end
 
   @brs_url "https://istudent.urfu.ru/s/http-urfu-ru-ru-students-study-brs"
@@ -32,7 +32,7 @@ defmodule UrfuApi.IStudent.Client do
 
     url = @brs_url <> path
 
-    %{body: body} = UrfuApi.Client.request!(:get, url, headers_with_token(token))
+    %{body: body} = UrFUAPI.Client.request!(:get, url, headers_with_token(token))
 
     body
   end

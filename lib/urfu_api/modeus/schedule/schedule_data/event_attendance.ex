@@ -1,4 +1,4 @@
-defmodule UrfuApi.Modeus.Schedule.ScheduleData.EventAttendance do
+defmodule UrFUAPI.Modeus.Schedule.ScheduleData.EventAttendance do
   # TODO
   @moduledoc false
   use TypedStruct

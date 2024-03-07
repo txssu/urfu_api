@@ -1,4 +1,4 @@
-defmodule UrfuApi.AuthHelpers do
+defmodule UrFUAPI.AuthHelpers do
   @moduledoc false
   @spec ensure_redirect(Finch.Response.t()) :: {:ok, Finch.Response.t()} | :error
   def ensure_redirect(response)

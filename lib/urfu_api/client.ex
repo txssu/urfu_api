@@ -1,4 +1,4 @@
-defmodule UrfuApi.Client do
+defmodule UrFUAPI.Client do
   @moduledoc false
 
   @spec build(

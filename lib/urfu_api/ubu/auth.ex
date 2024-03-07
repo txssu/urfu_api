@@ -1,8 +1,8 @@
-defmodule UrfuApi.UBU.Auth do
+defmodule UrFUAPI.UBU.Auth do
   @moduledoc false
-  alias UrfuApi.AuthHelpers
-  alias UrfuApi.UBU
-  alias UrfuApi.UBU.Auth.Token
+  alias UrFUAPI.AuthHelpers
+  alias UrFUAPI.UBU
+  alias UrFUAPI.UBU.Auth.Token
 
   @spec sign_in(String.t(), String.t()) :: {:ok, Token.t()} | {:error, String.t()}
   def sign_in(username, password) do

@@ -1,4 +1,4 @@
-defmodule UrfuApi.MixProject do
+defmodule UrFUAPI.MixProject do
   use Mix.Project
 
   def project do
@@ -16,7 +16,7 @@ defmodule UrfuApi.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {UrfuApi.Application, []}
+      mod: {UrFUAPI.Application, []}
     ]
   end
 

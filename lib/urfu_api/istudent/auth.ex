@@ -1,8 +1,8 @@
-defmodule UrfuApi.IStudent.Auth do
+defmodule UrFUAPI.IStudent.Auth do
   @moduledoc false
-  alias UrfuApi.AuthHelpers
-  alias UrfuApi.IStudent
-  alias UrfuApi.IStudent.Auth.Token
+  alias UrFUAPI.AuthHelpers
+  alias UrFUAPI.IStudent
+  alias UrFUAPI.IStudent.Auth.Token
 
   @spec sign_in(String.t(), String.t()) :: {:ok, Token.t()} | {:error, String.t()}
   def sign_in(username, password) do

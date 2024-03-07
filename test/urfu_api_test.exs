@@ -1,3 +1,3 @@
-defmodule UrfuApiTest do
+defmodule UrFUAPITest do
   use ExUnit.Case
 end

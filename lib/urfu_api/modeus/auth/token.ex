@@ -1,9 +1,9 @@
-defmodule UrfuApi.Modeus.Auth.Token do
+defmodule UrFUAPI.Modeus.Auth.Token do
   @moduledoc false
   use TypedStruct
   use ExConstructor
 
-  alias UrfuApi.Modeus.Auth.TokenClaims
+  alias UrFUAPI.Modeus.Auth.TokenClaims
 
   typedstruct enforce: true do
     field :access_token, String.t()

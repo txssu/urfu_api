@@ -1,4 +1,4 @@
-# UrfuApi
+# UrFUAPI
 
 **TODO: Add description**
 

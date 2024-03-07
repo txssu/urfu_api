@@ -1,9 +1,9 @@
-defmodule UrfuApi.Modeus.Schedule.ScheduleData.Room do
+defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Room do
   @moduledoc false
   use TypedStruct
   use ExConstructor
 
-  alias UrfuApi.Modeus.Schedule.ScheduleData.Building
+  alias UrFUAPI.Modeus.Schedule.ScheduleData.Building
 
   typedstruct enforce: true do
     field :id, String.t()

@@ -1,4 +1,4 @@
-defmodule UrfuApi.UBU.CommunalCharges.Info do
+defmodule UrFUAPI.UBU.CommunalCharges.Info do
   @moduledoc false
   use TypedStruct
   use ExConstructor

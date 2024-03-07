@@ -1,9 +1,9 @@
-defmodule UrfuApi.Modeus.Schedule do
+defmodule UrFUAPI.Modeus.Schedule do
   @moduledoc false
-  alias UrfuApi.Modeus.Auth.Token
-  alias UrfuApi.Modeus.Auth.TokenClaims
-  alias UrfuApi.Modeus.Client
-  alias UrfuApi.Modeus.Schedule.ScheduleData
+  alias UrFUAPI.Modeus.Auth.Token
+  alias UrFUAPI.Modeus.Auth.TokenClaims
+  alias UrFUAPI.Modeus.Client
+  alias UrFUAPI.Modeus.Schedule.ScheduleData
 
   @spec get_schedule(Token.t(), DateTime.t(), DateTime.t()) :: ScheduleData.t()
   def get_schedule(%Token{claims: %TokenClaims{person_id: person_id}} = auth, after_time, before_time) do

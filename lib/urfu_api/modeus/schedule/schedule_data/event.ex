@@ -1,4 +1,4 @@
-defmodule UrfuApi.Modeus.Schedule.ScheduleData.Event do
+defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Event do
   @moduledoc false
   use TypedStruct
   use ExConstructor, :do_new

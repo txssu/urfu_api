@@ -1,4 +1,4 @@
-defmodule UrfuApi.Modeus.Schedule.ScheduleData.PersonMidCheckResult do
+defmodule UrFUAPI.Modeus.Schedule.ScheduleData.PersonMidCheckResult do
   # TODO
   @moduledoc false
   use TypedStruct

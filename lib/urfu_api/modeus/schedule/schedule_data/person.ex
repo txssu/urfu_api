@@ -1,4 +1,4 @@
-defmodule UrfuApi.Modeus.Schedule.ScheduleData.Person do
+defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Person do
   @moduledoc false
   use TypedStruct
   use ExConstructor
