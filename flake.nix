@@ -32,6 +32,10 @@
             CoreFoundation
             CoreServices
           ]);
+          shellHook = ''
+            export MIX_HOME=$PWD/.nix-mix
+            export HEX_HOME=$PWD/.nix-hex
+          '';
         };
       });
 }

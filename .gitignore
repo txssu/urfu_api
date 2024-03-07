@@ -25,5 +25,9 @@ urfu_api-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# Environment
+.env
+
 # Nix
+.nix-*
 .direnv
