@@ -1,9 +1,9 @@
-defmodule UrfuApi.Istudent.BRS.Subject do
+defmodule UrfuApi.IStudent.BRS.Subject do
   @moduledoc false
   use TypedStruct
   use ExConstructor
 
-  alias UrfuApi.Istudent.BRS.SubjectScore
+  alias UrfuApi.IStudent.BRS.SubjectScore
 
   typedstruct enforce: true do
     field :id, pos_integer()

@@ -1,4 +1,4 @@
-defmodule UrfuApi.Istudent.Auth.Token do
+defmodule UrfuApi.IStudent.Auth.Token do
   @moduledoc false
   use TypedStruct
 
