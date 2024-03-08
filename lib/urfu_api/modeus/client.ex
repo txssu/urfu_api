@@ -8,49 +8,51 @@ defmodule UrFUAPI.Modeus.Client do
 
   @modeus_schedule_base "https://urfu.modeus.org/schedule-calendar-v2/api"
 
-  @spec request_schedule!(String.t(), Token.t(), term()) :: term()
-  def request_schedule!(path, token, request_body) do
-    encoded_body = Jason.encode!(request_body)
-
-    %{body: body} = UrFUAPI.Client.request!(:post, @modeus_schedule_base <> path, headers_with_token(token), encoded_body)
-
-    Jason.decode!(body)
+  @spec request_schedule(String.t(), Token.t(), term()) :: {:ok, map()} | {:error, term()}
+  def request_schedule(path, token, request_body) do
+    with {:ok, encoded_body} <- Jason.encode(request_body),
+         {:ok, %{body: body}} <-
+           UrFUAPI.Client.request(:post, @modeus_schedule_base <> path, headers_with_token(token), encoded_body),
+         {:ok, data} <- Jason.decode(body) do
+      {:ok, data}
+    end
   end
 
-  @spec request_relay_data!() :: Finch.Response.t()
-  def request_relay_data! do
-    UrFUAPI.Client.request!(:get, @oauth2)
+  @spec request_relay_data() :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
+  def request_relay_data do
+    UrFUAPI.Client.request(:get, @oauth2)
   end
 
-  @spec request_saml_tokens!(Finch.Request.url(), term()) :: Finch.Response.t()
-  def request_saml_tokens!(url, body) do
-    request_urlencoded!(:post, url, body)
+  @spec request_saml_tokens(Finch.Request.url(), term()) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
+  def request_saml_tokens(url, body) do
+    request_urlencoded(:post, url, body)
   end
 
-  @spec request_saml_auth!(Finch.Request.url(), [String.t()]) :: Finch.Response.t()
-  def request_saml_auth!(url, tokens) do
+  @spec request_saml_auth(Finch.Request.url(), [String.t()]) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
+  def request_saml_auth(url, tokens) do
     headers = [{"cookie", Enum.join(tokens, ";")}]
 
-    UrFUAPI.Client.request!(:get, url, headers)
+    UrFUAPI.Client.request(:get, url, headers)
   end
 
-  @spec request_auth_link!(term()) :: Finch.Response.t()
-  def request_auth_link!(body) do
-    request_urlencoded!(:post, @common_auth, body)
+  @spec request_auth_link(term()) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
+  def request_auth_link(body) do
+    request_urlencoded(:post, @common_auth, body)
   end
 
-  @spec auth_with_url(Finch.Request.url()) :: Finch.Response.t()
+  @spec auth_with_url(Finch.Request.url()) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
   def auth_with_url(url) do
-    UrFUAPI.Client.request!(:get, url)
+    UrFUAPI.Client.request(:get, url)
   end
 
-  @spec request_urlencoded!(Finch.Request.method(), Finch.Request.url(), term()) :: Finch.Response.t()
-  def request_urlencoded!(method, url, body) do
+  @spec request_urlencoded(Finch.Request.method(), Finch.Request.url(), term()) ::
+          {:ok, Finch.Response.t()} | {:error, Exception.t()}
+  def request_urlencoded(method, url, body) do
     headers = [{"content-type", "application/x-www-form-urlencoded"}]
 
     encoded_body = URI.encode_query(body)
 
-    UrFUAPI.Client.request!(method, url, headers, encoded_body)
+    UrFUAPI.Client.request(method, url, headers, encoded_body)
   end
 
   defp headers_with_token(%{id_token: id_token}) do

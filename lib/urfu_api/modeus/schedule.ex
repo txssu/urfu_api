@@ -5,7 +5,7 @@ defmodule UrFUAPI.Modeus.Schedule do
   alias UrFUAPI.Modeus.Client
   alias UrFUAPI.Modeus.Schedule.ScheduleData
 
-  @spec get_schedule(Token.t(), DateTime.t(), DateTime.t()) :: ScheduleData.t()
+  @spec get_schedule(Token.t(), DateTime.t(), DateTime.t()) :: {:ok, ScheduleData.t()} | {:error, term()}
   def get_schedule(%Token{claims: %TokenClaims{person_id: person_id}} = auth, after_time, before_time) do
     body = %{
       attendeePersonId: [person_id],
@@ -14,9 +14,9 @@ defmodule UrFUAPI.Modeus.Schedule do
       size: 500
     }
 
-    %{"_embedded" => database} = Client.request_schedule!("/calendar/events/search", auth, body)
-
-    ScheduleData.new(database)
+    with {:ok, %{"_embedded" => database}} <- Client.request_schedule("/calendar/events/search", auth, body) do
+      {:ok, ScheduleData.new(database)}
+    end
   end
 
   @spec fetch_by_link(map, String.t(), ScheduleData.t()) :: {:ok, map()} | :error

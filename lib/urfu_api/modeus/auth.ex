@@ -42,11 +42,11 @@ defmodule UrFUAPI.Modeus.Auth do
 
   @spec get_relay_data(AuthProcess.t()) :: AuthProcess.t()
   defp get_relay_data(%AuthProcess{} = process) do
-    response = Modeus.Client.request_relay_data!()
-
-    response
-    |> AuthHelpers.fetch_location!()
-    |> insert_relay_data(process)
+    with {:ok, response} <- Modeus.Client.request_relay_data() do
+      response
+      |> AuthHelpers.fetch_location!()
+      |> insert_relay_data(process)
+    end
   end
 
   @spec insert_relay_data(String.t(), AuthProcess.t()) :: AuthProcess.t()
@@ -74,19 +74,19 @@ defmodule UrFUAPI.Modeus.Auth do
       "AuthMethod" => "FormsAuthentication"
     }
 
-    response = Modeus.Client.request_saml_tokens!(url, body)
+    with {:ok, response} <- Modeus.Client.request_saml_tokens(url, body) do
+      case AuthHelpers.ensure_redirect(response) do
+        {:ok, response} ->
+          process =
+            response
+            |> AuthHelpers.fetch_cookies!()
+            |> insert_saml_tokens(process)
 
-    case AuthHelpers.ensure_redirect(response) do
-      {:ok, response} ->
-        process =
-          response
-          |> AuthHelpers.fetch_cookies!()
-          |> insert_saml_tokens(process)
+          {:ok, process}
 
-        {:ok, process}
-
-      :error ->
-        {:error, "Wrong credentials"}
+        :error ->
+          {:error, "Wrong credentials"}
+      end
     end
   end
 
@@ -97,10 +97,11 @@ defmodule UrFUAPI.Modeus.Auth do
 
   @spec get_saml_response(AuthProcess.t()) :: AuthProcess.t()
   defp get_saml_response(%AuthProcess{relay_url: url, saml_tokens: tokens} = process) do
-    url
-    |> Modeus.Client.request_saml_auth!(tokens)
-    |> parse_saml_response()
-    |> insert_saml_response(process)
+    with {:ok, response} <- Modeus.Client.request_saml_auth(url, tokens) do
+      response
+      |> parse_saml_response()
+      |> insert_saml_response(process)
+    end
   end
 
   @spec insert_saml_response(String.t(), AuthProcess.t()) :: AuthProcess.t()
@@ -132,11 +133,11 @@ defmodule UrFUAPI.Modeus.Auth do
       "RelayState" => relay_state
     }
 
-    body
-    |> Modeus.Client.request_auth_link!()
-    |> AuthHelpers.fetch_location!()
-    |> Modeus.Client.auth_with_url()
-    |> AuthHelpers.fetch_location!()
+    with {:ok, auth_link_response} <- Modeus.Client.request_auth_link(body),
+         location = AuthHelpers.fetch_location!(auth_link_response),
+         {:ok, response} <- Modeus.Client.auth_with_url(location) do
+      AuthHelpers.fetch_location!(response)
+    end
   end
 
   @spec parse_auth_url(String.t()) :: %{optional(binary) => binary}

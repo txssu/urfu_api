@@ -27,26 +27,27 @@ defmodule UrFUAPI.IStudent.Auth do
       "AuthMethod" => "FormsAuthentication"
     }
 
-    response = IStudent.Client.request_urfu_sso!(:post, body, [])
-
-    case AuthHelpers.ensure_redirect(response) do
-      :error -> {:error, "Wrong credentials"}
-      {:ok, response} -> {:ok, AuthHelpers.fetch_cookies!(response)}
+    with {:ok, response} <- IStudent.Client.request_urfu_sso(:post, body, []) do
+      case AuthHelpers.ensure_redirect(response) do
+        :error -> {:error, "Wrong credentials"}
+        {:ok, response} -> {:ok, AuthHelpers.fetch_cookies!(response)}
+      end
     end
   end
 
   defp get_auth_url(tokens) do
     cookies = Enum.join(tokens, ";")
 
-    response = IStudent.Client.request_urfu_sso!(:get, [], [{"cookie", cookies}])
-
-    AuthHelpers.fetch_location!(response)
+    with {:ok, response} <- IStudent.Client.request_urfu_sso(:get, [], [{"cookie", cookies}]) do
+      AuthHelpers.fetch_location!(response)
+    end
   end
 
   defp get_access_token(url, username) do
-    url
-    |> IStudent.Client.request_istudent_token!()
-    |> AuthHelpers.fetch_cookie!()
-    |> Token.new(username)
+    with {:ok, response_with_token} <- IStudent.Client.request_istudent_token(url) do
+      response_with_token
+      |> AuthHelpers.fetch_cookie!()
+      |> Token.new(username)
+    end
   end
 end

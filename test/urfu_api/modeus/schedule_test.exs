@@ -18,6 +18,7 @@ defmodule UrFUAPI.Modeus.ScheduleTest do
 
   @tag :api
   test "get schedule", %{auth: auth} do
-    assert %Schedule.ScheduleData{} = Schedule.get_schedule(auth, ~U[2023-12-01 00:00:00Z], ~U[2023-12-02 00:00:00Z])
+    assert {:ok, %Schedule.ScheduleData{}} =
+             Schedule.get_schedule(auth, ~U[2023-12-01 00:00:00Z], ~U[2023-12-02 00:00:00Z])
   end
 end

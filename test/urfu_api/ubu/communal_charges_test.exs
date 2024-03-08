@@ -18,6 +18,6 @@ defmodule UrFUAPI.UBU.CommunalChargesTest do
 
   @tag :api
   test "get communal charges", %{auth: auth} do
-    assert %CommunalCharges.Info{} = CommunalCharges.get_dates(auth)
+    assert {:ok, %CommunalCharges.Info{}} = CommunalCharges.get_dates(auth)
   end
 end

@@ -25,17 +25,4 @@ defmodule UrFUAPI.Client do
     |> build(url, headers, body, opts)
     |> Finch.request(__MODULE__)
   end
-
-  @spec request!(
-          Finch.Request.method(),
-          Finch.Request.url(),
-          Finch.Request.headers(),
-          Finch.Request.body(),
-          Keyword.t()
-        ) :: Finch.Response.t()
-  def request!(method, url, headers \\ [], body \\ nil, opts \\ []) do
-    method
-    |> build(url, headers, body, opts)
-    |> Finch.request!(__MODULE__)
-  end
 end

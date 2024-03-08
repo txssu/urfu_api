@@ -5,11 +5,11 @@ defmodule UrFUAPI.IStudent.BRS do
   alias UrFUAPI.IStudent.BRS.SubjectScore
   alias UrFUAPI.IStudent.Client
 
-  @spec get_subjects(Token.t()) :: [Subject.t()]
+  @spec get_subjects(Token.t()) :: {:ok, [Subject.t()]} | {:error, term()}
   def get_subjects(auth) do
-    auth
-    |> Client.request_brs!()
-    |> parse_subjects()
+    with {:ok, response} <- Client.request_brs(auth) do
+      {:ok, parse_subjects(response)}
+    end
   end
 
   defp parse_subjects(body) do
@@ -54,14 +54,12 @@ defmodule UrFUAPI.IStudent.BRS do
     |> unpack_text()
   end
 
-  @spec preload_subject_scores(Token.t(), Subject.t()) :: Subject.t()
+  @spec preload_subject_scores(Token.t(), Subject.t()) :: {:ok, Subject.t()} | {:error, term()}
   def preload_subject_scores(auth, %Subject{id: object_id} = subject) do
-    scores =
-      auth
-      |> Client.request_brs!(discipline: object_id)
-      |> parse_subject_scores()
-
-    %{subject | scores: scores}
+    with {:ok, response} <- Client.request_brs(auth, discipline: object_id) do
+      scores = parse_subject_scores(response)
+      {:ok, %{subject | scores: scores}}
+    end
   end
 
   defp parse_subject_scores(body) do

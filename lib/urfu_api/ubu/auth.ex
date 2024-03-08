@@ -28,26 +28,26 @@ defmodule UrFUAPI.UBU.Auth do
       "AuthMethod" => "FormsAuthentication"
     }
 
-    response = UBU.Client.request_urfu_sso!(:post, body, [])
-
-    case AuthHelpers.ensure_redirect(response) do
-      :error -> {:error, "Wrong credentials"}
-      {:ok, response} -> {:ok, AuthHelpers.fetch_cookies!(response)}
+    with {:ok, response} <- UBU.Client.request_urfu_sso(:post, body, []) do
+      case AuthHelpers.ensure_redirect(response) do
+        :error -> {:error, "Wrong credentials"}
+        {:ok, response} -> {:ok, AuthHelpers.fetch_cookies!(response)}
+      end
     end
   end
 
   defp get_auth_url(tokens) do
     cookies = Enum.join(tokens, ";")
 
-    response = UBU.Client.request_urfu_sso!(:get, [], [{"cookie", cookies}])
-
-    AuthHelpers.fetch_location!(response)
+    with {:ok, response} <- UBU.Client.request_urfu_sso(:get, [], [{"cookie", cookies}]) do
+      AuthHelpers.fetch_location!(response)
+    end
   end
 
   defp get_ubu_login_code(url) do
-    url
-    |> UBU.Client.request_ubu_code!()
-    |> parse_ubu_code()
+    with {:ok, response} <- UBU.Client.request_ubu_code(url) do
+      parse_ubu_code(response)
+    end
   end
 
   defp parse_ubu_code(response) do
@@ -70,9 +70,10 @@ defmodule UrFUAPI.UBU.Auth do
       }
     }
 
-    body
-    |> UBU.Client.request_ubu_token!()
-    |> AuthHelpers.fetch_cookies!()
-    |> Token.new(username)
+    with {:ok, response} <- UBU.Client.request_ubu_token(body) do
+      response
+      |> AuthHelpers.fetch_cookies!()
+      |> Token.new(username)
+    end
   end
 end

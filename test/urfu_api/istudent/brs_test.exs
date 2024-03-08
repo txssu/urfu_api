@@ -18,15 +18,16 @@ defmodule UrFUAPI.IStudent.BRSTest do
 
   @tag :api
   test "get brs subjects", %{auth: auth} do
-    assert %BRS.Subject{} = auth |> BRS.get_subjects() |> hd()
+    assert {:ok, subjects} = BRS.get_subjects(auth)
+    assert %BRS.Subject{} = hd(subjects)
   end
 
   @tag :api
   test "update ", %{auth: auth} do
-    subject = auth |> BRS.get_subjects() |> hd()
+    {:ok, subjects} = BRS.get_subjects(auth)
+    subject = hd(subjects)
 
-    preloaded_subject = BRS.preload_subject_scores(auth, subject)
-
+    {:ok, preloaded_subject} = BRS.preload_subject_scores(auth, subject)
     assert preloaded_subject.scores != subject.scores
   end
 end

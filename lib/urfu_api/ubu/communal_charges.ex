@@ -4,10 +4,10 @@ defmodule UrFUAPI.UBU.CommunalCharges do
   alias UrFUAPI.UBU.Client
   alias UrFUAPI.UBU.CommunalCharges.Info
 
-  @spec get_dates(Token.t()) :: Info.t()
+  @spec get_dates(Token.t()) :: {:ok, Info.t()} | {:error, term()}
   def get_dates(auth) do
-    auth
-    |> Client.exec("CommunalCharges.GetDates")
-    |> Info.new()
+    with {:ok, response} <- Client.exec(auth, "CommunalCharges.GetDates") do
+      {:ok, Info.new(response)}
+    end
   end
 end
