@@ -1,23 +1,16 @@
 defmodule UrFUAPI.UBU.Auth do
   @moduledoc false
+  alias UrFUAPI.AuthExceptions.ServerResponseFormatError
   alias UrFUAPI.AuthHelpers
   alias UrFUAPI.UBU
   alias UrFUAPI.UBU.Auth.Token
 
   @spec sign_in(String.t(), String.t()) :: {:ok, Token.t()} | {:error, String.t()}
   def sign_in(username, password) do
-    case get_auth_tokens(username, password) do
-      {:ok, auth_tokens} ->
-        token =
-          auth_tokens
-          |> get_auth_url()
-          |> get_ubu_login_code()
-          |> get_access_token(username)
-
-        {:ok, token}
-
-      err ->
-        err
+    with {:ok, auth_tokens} <- get_auth_tokens(username, password),
+         {:ok, auth_url} <- get_auth_url(auth_tokens),
+         {:ok, login_code} <- get_ubu_login_code(auth_url) do
+      get_access_token(login_code, username)
     end
   end
 
@@ -28,10 +21,11 @@ defmodule UrFUAPI.UBU.Auth do
       "AuthMethod" => "FormsAuthentication"
     }
 
-    with {:ok, response} <- UBU.Client.request_urfu_sso(:post, body, []) do
-      case AuthHelpers.ensure_redirect(response) do
-        :error -> {:error, "Wrong credentials"}
-        {:ok, response} -> {:ok, AuthHelpers.fetch_cookies!(response)}
+    with {:ok, response} <- UBU.Client.request_urfu_sso(:post, body, []),
+         {:ok, response_good_credentials} <- AuthHelpers.ensure_redirect(response) do
+      case AuthHelpers.fetch_cookies(response_good_credentials) do
+        [_c1, _c2] = cookies -> {:ok, cookies}
+        wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
       end
     end
   end
@@ -40,7 +34,7 @@ defmodule UrFUAPI.UBU.Auth do
     cookies = Enum.join(tokens, ";")
 
     with {:ok, response} <- UBU.Client.request_urfu_sso(:get, [], [{"cookie", cookies}]) do
-      AuthHelpers.fetch_location!(response)
+      AuthHelpers.fetch_location(response)
     end
   end
 
@@ -51,15 +45,24 @@ defmodule UrFUAPI.UBU.Auth do
   end
 
   defp parse_ubu_code(response) do
-    %{query: query} =
-      response
-      |> AuthHelpers.fetch_location!()
-      |> URI.parse()
+    with {:ok, query_stream} <- fetch_location_query(response) do
+      maybe_code = Enum.find_value(query_stream, &(if elem(&1, 0) == "code", do: elem(&1, 1)))
+      case maybe_code do
+        nil -> {:error, ServerResponseFormatError.exception(%{except: "query with ubu code", got: response})}
+        code -> {:ok, code}
+      end
+    end
+  end
 
-    query
-    |> URI.query_decoder()
-    |> Map.new()
-    |> Map.fetch!("code")
+  defp fetch_location_query(response) do
+    case AuthHelpers.fetch_location(response) do
+      :error ->
+        {:error, ServerResponseFormatError.exception(%{except: "url to get ubu code", got: response})}
+
+      {:ok, location} ->
+        %{query: query} = URI.parse(location)
+        {:ok, URI.query_decoder(query)}
+    end
   end
 
   defp get_access_token(login_code, username) do
@@ -71,9 +74,10 @@ defmodule UrFUAPI.UBU.Auth do
     }
 
     with {:ok, response} <- UBU.Client.request_ubu_token(body) do
-      response
-      |> AuthHelpers.fetch_cookies!()
-      |> Token.new(username)
+      case AuthHelpers.fetch_cookies(response) do
+        [_c1, _c2] = cookies -> {:ok, Token.new(cookies, username)}
+        cookies -> {:error, ServerResponseFormatError.exception(%{except: "two auth cookies", got: cookies})}
+      end
     end
   end
 end

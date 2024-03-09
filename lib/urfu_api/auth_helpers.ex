@@ -1,5 +1,8 @@
 defmodule UrFUAPI.AuthHelpers do
   @moduledoc false
+
+  alias UrFUAPI.AuthExceptions.WrongCredentialsError
+
   @spec ensure_redirect(Finch.Response.t()) :: {:ok, Finch.Response.t()} | :error
   def ensure_redirect(response)
 
@@ -9,37 +12,39 @@ defmodule UrFUAPI.AuthHelpers do
 
   def ensure_redirect(_not_redirect), do: :error
 
-  @spec fetch_location!(Finch.Response.t()) :: String.t()
-  def fetch_location!(%{} = env) do
-    fetch_header!(env, "location")
+  @spec fetch_location(Finch.Response.t()) :: {:ok, String.t()} | :error
+  def fetch_location(%{} = env) do
+    fetch_header(env, "location")
   end
 
-  @spec fetch_cookies!(Finch.Response.t()) :: [String.t()]
-  def fetch_cookies!(%{} = env) do
-    fetch_headers!(env, "set-cookie")
+  @spec fetch_cookies(Finch.Response.t()) :: [String.t()]
+  def fetch_cookies(%{} = env) do
+    fetch_headers(env, "set-cookie")
   end
 
-  @spec fetch_cookie!(Finch.Response.t()) :: String.t()
-  def fetch_cookie!(%{} = env) do
-    fetch_header!(env, "set-cookie")
+  @spec fetch_cookie(Finch.Response.t()) :: {:ok, String.t()} | :error
+  def fetch_cookie(%{} = env) do
+    fetch_header(env, "set-cookie")
   end
 
-  @spec fetch_header!(Finch.Response.t(), String.t()) :: String.t()
-  def fetch_header!(%{headers: headers}, key) do
-    headers
-    |> List.keyfind!(key, 0)
-    |> elem(1)
+  @spec fetch_header(Finch.Response.t(), String.t()) :: {:ok, String.t()} | :error
+  def fetch_header(%{headers: headers}, key) do
+    case List.keyfind(headers, key, 0) do
+      nil -> :error
+      value -> {:ok, elem(value, 1)}
+    end
   end
 
-  @spec fetch_headers!(Finch.Response.t(), String.t()) :: [String.t()]
-  def fetch_headers!(%{headers: headers}, key) do
-    maybe_headers = for {k, v} <- headers, k == key, do: v
+  @spec fetch_headers(Finch.Response.t(), String.t()) :: [String.t()]
+  def fetch_headers(%{headers: headers}, key) do
+    for {k, v} <- headers, k == key, do: v
+  end
 
-    if Enum.empty?(maybe_headers) do
-      headers = inspect(headers)
-      raise "There's no #{key} in #{headers}"
-    else
-      maybe_headers
+  @spec ensure_correct_credentials(Finch.Response.t()) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
+  def ensure_correct_credentials(response) do
+    case ensure_redirect(response) do
+      :error -> {:error, WrongCredentialsError.exception(nil)}
+      {:ok, _response} = ok -> ok
     end
   end
 end
