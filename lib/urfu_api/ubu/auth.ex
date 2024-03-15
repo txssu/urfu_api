@@ -1,6 +1,7 @@
 defmodule UrFUAPI.UBU.Auth do
   @moduledoc false
   alias UrFUAPI.AuthExceptions.ServerResponseFormatError
+  alias UrFUAPI.AuthExceptions.WrongCredentialsError
   alias UrFUAPI.AuthHelpers
   alias UrFUAPI.UBU
   alias UrFUAPI.UBU.Auth.Token
@@ -22,11 +23,19 @@ defmodule UrFUAPI.UBU.Auth do
     }
 
     with {:ok, response} <- UBU.Client.request_urfu_sso(:post, body, []),
-         {:ok, response_good_credentials} <- AuthHelpers.ensure_redirect(response) do
-      case AuthHelpers.fetch_cookies(response_good_credentials) do
-        [_c1, _c2] = cookies -> {:ok, cookies}
-        wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
-      end
+         {:ensure_redirect, {:ok, response_good_credentials}} <-
+           {:ensure_redirect, AuthHelpers.ensure_redirect(response)},
+         {:fetch_cookies, [_c1, _c2] = cookies} <- {:fetch_cookies, AuthHelpers.fetch_cookies(response_good_credentials)} do
+      {:ok, cookies}
+    else
+      {:fetch_cookies, wrong_data} ->
+        {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
+
+      {:ensure_redirect, :error} ->
+        {:error, WrongCredentialsError.exception(nil)}
+
+      err ->
+        err
     end
   end
 
@@ -46,7 +55,8 @@ defmodule UrFUAPI.UBU.Auth do
 
   defp parse_ubu_code(response) do
     with {:ok, query_stream} <- fetch_location_query(response) do
-      maybe_code = Enum.find_value(query_stream, &(if elem(&1, 0) == "code", do: elem(&1, 1)))
+      maybe_code = Enum.find_value(query_stream, &if(elem(&1, 0) == "code", do: elem(&1, 1)))
+
       case maybe_code do
         nil -> {:error, ServerResponseFormatError.exception(%{except: "query with ubu code", got: response})}
         code -> {:ok, code}

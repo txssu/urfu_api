@@ -8,7 +8,7 @@ defmodule UrFUAPI.IStudent.BRS do
   @spec get_subjects(Token.t()) :: {:ok, [Subject.t()]} | {:error, term()}
   def get_subjects(auth) do
     with {:ok, response} <- Client.request_brs(auth) do
-      {:ok, parse_subjects(response)}
+      parse_subjects(response)
     end
   end
 

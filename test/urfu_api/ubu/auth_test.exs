@@ -18,6 +18,6 @@ defmodule UrFUAPI.UBU.AuthTest do
 
   @tag :api
   test "Auth with invalid credentials" do
-    assert {:error, _auth} = Auth.sign_in("username", "password")
+    assert {:error, _reason} = Auth.sign_in("username", "password")
   end
 end
