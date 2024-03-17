@@ -9,12 +9,7 @@ defmodule UrFUAPI.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
-        coveralls: :test,
-        "coveralls.html": :test
-      ]
+      deps: deps()
     ]
   end
 
@@ -40,7 +35,6 @@ defmodule UrFUAPI.MixProject do
       {:floki, "~> 0.35.0"},
       {:exconstructor, github: "txssu/exconstructor"},
       {:typedstruct, "~> 0.5.2"},
-      {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 1.7.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.3", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.2", only: [:dev, :test], runtime: false},
