@@ -5,7 +5,7 @@ defmodule UrFUAPI.IStudent.BRSTest do
   alias UrFUAPI.IStudent.BRS
 
   setup context do
-    if context[:api] do
+    if context[:integration] do
       %{username: username, password: password} = UrFUAPI.Credentials.fetch_from_env()
 
       {:ok, auth} = Auth.sign_in(username, password)
@@ -16,13 +16,13 @@ defmodule UrFUAPI.IStudent.BRSTest do
     end
   end
 
-  @tag :api
+  @tag :integration
   test "get brs subjects", %{auth: auth} do
     assert {:ok, subjects} = BRS.get_subjects(auth)
     assert %BRS.Subject{} = hd(subjects)
   end
 
-  @tag :api
+  @tag :integration
   test "update ", %{auth: auth} do
     {:ok, subjects} = BRS.get_subjects(auth)
     subject = hd(subjects)

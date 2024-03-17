@@ -4,19 +4,19 @@ defmodule UrFUAPI.IStudent.AuthTest do
   alias UrFUAPI.IStudent.Auth
 
   setup context do
-    if context[:api] do
+    if context[:integration] do
       UrFUAPI.Credentials.fetch_from_env()
     else
       :ok
     end
   end
 
-  @tag :api
+  @tag :integration
   test "Auth with valid credentials", %{username: username, password: password} do
     assert {:ok, _auth} = Auth.sign_in(username, password)
   end
 
-  @tag :api
+  @tag :integration
   test "Auth with invalid credentials" do
     assert {:error, _auth} = Auth.sign_in("username", "password")
   end

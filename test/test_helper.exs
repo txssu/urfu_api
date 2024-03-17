@@ -1,1 +1,1 @@
-ExUnit.start(exclude: :api)
+ExUnit.start(exclude: :integration)
