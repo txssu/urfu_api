@@ -1,5 +1,7 @@
 defmodule UrFUAPI.UBU.Auth do
   @moduledoc false
+  use Publicist
+
   alias UrFUAPI.AuthExceptions.ServerResponseFormatError
   alias UrFUAPI.AuthExceptions.WrongCredentialsError
   alias UrFUAPI.AuthHelpers
