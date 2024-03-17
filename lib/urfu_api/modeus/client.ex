@@ -12,9 +12,8 @@ defmodule UrFUAPI.Modeus.Client do
   def request_schedule(path, token, request_body) do
     with {:ok, encoded_body} <- Jason.encode(request_body),
          {:ok, %{body: body}} <-
-           UrFUAPI.Client.request(:post, @modeus_schedule_base <> path, headers_with_token(token), encoded_body),
-         {:ok, data} <- Jason.decode(body) do
-      {:ok, data}
+           UrFUAPI.Client.request(:post, @modeus_schedule_base <> path, headers_with_token(token), encoded_body) do
+      Jason.decode(body)
     end
   end
 

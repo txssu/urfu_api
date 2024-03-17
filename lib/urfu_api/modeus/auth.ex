@@ -70,22 +70,24 @@ defmodule UrFUAPI.Modeus.Auth do
       "AuthMethod" => "FormsAuthentication"
     }
 
-    request_result = Modeus.Client.request_saml_tokens(url, body)
-
-    with {:ok, response} <- request_result,
-         {:ensure_redirect, {:ok, good_response}} <- {:ensure_redirect, AuthHelpers.ensure_redirect(response)},
-         {:fetch_cookies, [_c1, _c2] = tokens} <- {:fetch_cookies, AuthHelpers.fetch_cookies(good_response)} do
+    with {:ok, response} <- Modeus.Client.request_saml_tokens(url, body),
+         {:ok, response_good_credentials} <- ensure_auth_ok(response),
+         {:ok, tokens} <- fetch_auth_cookies(response_good_credentials) do
       {:ok, insert_saml_tokens(process, tokens)}
-    else
-      {:ensure_redirect, :error} ->
-        {:error, WrongCredentialsError.exception(nil)}
+    end
+  end
 
-      {:fetch_cookies, :error} ->
-        {:ok, response} = request_result
-        {:error, ServerResponseFormatError.exception(%{except: "tokens in response", got: response})}
+  defp ensure_auth_ok(response) do
+    case AuthHelpers.ensure_redirect(response) do
+      {:ok, _response} = ok -> ok
+      :error -> {:error, WrongCredentialsError.exception(nil)}
+    end
+  end
 
-      error ->
-        error
+  defp fetch_auth_cookies(response) do
+    case AuthHelpers.fetch_cookies(response) do
+      [_c1, _c2] = cookies -> {:ok, cookies}
+      wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
     end
   end
 
@@ -101,15 +103,22 @@ defmodule UrFUAPI.Modeus.Auth do
   end
 
   defp parse_saml_response(%{body: body}) do
-    with {:parse_document, {:ok, document}} <- {:parse_document, Floki.parse_document(body)},
-         {:attribute, [saml_response]} <- {:attribute, Floki.attribute(document, "input[name=SAMLResponse]", "value")} do
-      {:ok, saml_response}
-    else
-      {:attribute, _no_saml_response} ->
-        {:error, ServerResponseFormatError.exception(%{except: "saml response in body", got: "body"})}
+    with {:ok, document} <- parse_document(body) do
+      fetch_saml_response(document)
+    end
+  end
 
-      {:parse_document, {:error, reason}} ->
-        {:error, Floki.ParseError.exception(reason)}
+  defp parse_document(body) do
+    case Floki.parse_document(body) do
+      {:ok, _document} = ok -> ok
+      {:error, reason} -> {:error, Floki.ParseError.exception(reason)}
+    end
+  end
+
+  defp fetch_saml_response(document) do
+    case Floki.attribute(document, "input[name=SAMLResponse]", "value") do
+      [saml_response] -> {:ok, saml_response}
+      _wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "saml response in document", got: document})}
     end
   end
 
@@ -149,7 +158,7 @@ defmodule UrFUAPI.Modeus.Auth do
     end
   end
 
-  def auth_with_url(url) do
+  defp auth_with_url(url) do
     with {:ok, response} <- Modeus.Client.auth_with_url(url) do
       case AuthHelpers.fetch_location(response) do
         :error -> {:error, ServerResponseFormatError.exception(%{except: "link with auth token", got: response})}

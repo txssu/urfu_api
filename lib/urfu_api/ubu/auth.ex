@@ -23,19 +23,22 @@ defmodule UrFUAPI.UBU.Auth do
     }
 
     with {:ok, response} <- UBU.Client.request_urfu_sso(:post, body, []),
-         {:ensure_redirect, {:ok, response_good_credentials}} <-
-           {:ensure_redirect, AuthHelpers.ensure_redirect(response)},
-         {:fetch_cookies, [_c1, _c2] = cookies} <- {:fetch_cookies, AuthHelpers.fetch_cookies(response_good_credentials)} do
-      {:ok, cookies}
-    else
-      {:fetch_cookies, wrong_data} ->
-        {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
+         {:ok, response_good_credentials} <- ensure_auth_ok(response) do
+      fetch_auth_cookies(response_good_credentials)
+    end
+  end
 
-      {:ensure_redirect, :error} ->
-        {:error, WrongCredentialsError.exception(nil)}
+  defp ensure_auth_ok(response) do
+    case AuthHelpers.ensure_redirect(response) do
+      {:ok, _response} = ok -> ok
+      :error -> {:error, WrongCredentialsError.exception(nil)}
+    end
+  end
 
-      err ->
-        err
+  defp fetch_auth_cookies(response) do
+    case AuthHelpers.fetch_cookies(response) do
+      [_c1, _c2] = cookies -> {:ok, cookies}
+      wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
     end
   end
 

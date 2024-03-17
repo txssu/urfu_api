@@ -5,7 +5,7 @@ defmodule UrFUAPI.IStudent.BRS do
   alias UrFUAPI.IStudent.BRS.SubjectScore
   alias UrFUAPI.IStudent.Client
 
-  @spec get_subjects(Token.t()) :: {:ok, [Subject.t()]} | {:error, term()}
+  @spec get_subjects(Token.t()) :: {:ok, [Subject.t()]} | {:error, Exception.t()}
   def get_subjects(auth) do
     with {:ok, response} <- Client.request_brs(auth) do
       parse_subjects(response)
@@ -13,26 +13,25 @@ defmodule UrFUAPI.IStudent.BRS do
   end
 
   defp parse_subjects(body) do
-    with {:ok, document} <- Floki.parse_document(body) do
-      case Floki.find(document, "a.rating-discipline") do
-        [] ->
-          {:error, Floki.ParseError.exception("can't find a.rating-discipline")}
+    with {:ok, document} <- parse_document(body),
+         {:ok, html_subjects} <- find_disciplines(document) do
+      {:ok,
+       Enum.reduce(html_subjects, [], fn
+         _html_subject, {:error, _error} = error ->
+           error
 
-        html_subjects ->
-          subjects =
-            Enum.reduce(html_subjects, [], fn
-              _html_subject, {:error, _error} = error ->
-                error
+         html_subject, acc ->
+           with {:ok, subject} <- parse_subject(html_subject) do
+             [subject | acc]
+           end
+       end)}
+    end
+  end
 
-              html_subject, acc ->
-                case parse_subject(html_subject) do
-                  {:ok, subject} -> [subject | acc]
-                  {:error, _error} = error -> error
-                end
-            end)
-
-          {:ok, subjects}
-      end
+  defp find_disciplines(document) do
+    case Floki.find(document, "a.rating-discipline") do
+      [] -> {:error, Floki.ParseError.exception("can't find a.rating-discipline")}
+      html_subjects -> {:ok, html_subjects}
     end
   end
 
@@ -96,26 +95,25 @@ defmodule UrFUAPI.IStudent.BRS do
   end
 
   defp parse_subject_scores(body) do
-    with {:ok, document} <- Floki.parse_document(body) do
-      case Floki.find(document, ".brs-countainer") do
-        [] ->
-          {:error, Floki.ParseError.exception("can't find .brs-countainer")}
+    with {:ok, document} <- parse_document(body),
+         {:ok, html_subject_scores} <- find_brs_containers(document) do
+      {:ok,
+       Enum.reduce(html_subject_scores, [], fn
+         _html_subject, {:error, _error} = error ->
+           error
 
-        html_subject_scores ->
-          subject_scores =
-            Enum.reduce(html_subject_scores, [], fn
-              _html_subject, {:error, _error} = error ->
-                error
+         html_subject, acc ->
+           with {:ok, subject_score} <- parse_subject_score(html_subject) do
+             [subject_score | acc]
+           end
+       end)}
+    end
+  end
 
-              html_subject, acc ->
-                case parse_subject_score(html_subject) do
-                  {:ok, subject_score} -> [subject_score | acc]
-                  {:error, _error} = error -> error
-                end
-            end)
-
-          {:ok, subject_scores}
-      end
+  defp find_brs_containers(document) do
+    case Floki.find(document, ".brs-countainer") do
+      [] -> {:error, Floki.ParseError.exception("can't find .brs-countainer in #{document}")}
+      html_subject_scores -> {:ok, html_subject_scores}
     end
   end
 
@@ -168,5 +166,12 @@ defmodule UrFUAPI.IStudent.BRS do
     html_tree
     |> Floki.text()
     |> String.trim()
+  end
+
+  defp parse_document(body) do
+    case Floki.parse_document(body) do
+      {:ok, _document} = ok -> ok
+      {:error, reason} -> {:error, Floki.ParseError.exception(reason)}
+    end
   end
 end

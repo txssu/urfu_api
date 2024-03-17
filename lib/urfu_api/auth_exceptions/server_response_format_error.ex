@@ -1,4 +1,5 @@
 defmodule UrFUAPI.AuthExceptions.ServerResponseFormatError do
+  @moduledoc false
   defexception [:message]
 
   @impl Exception

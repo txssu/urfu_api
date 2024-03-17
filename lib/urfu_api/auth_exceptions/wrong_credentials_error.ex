@@ -1,4 +1,5 @@
 defmodule UrFUAPI.AuthExceptions.WrongCredentialsError do
+  @moduledoc false
   defexception [:message]
 
   @impl Exception
