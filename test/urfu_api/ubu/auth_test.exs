@@ -6,16 +6,12 @@ defmodule UrFUAPI.UBU.AuthTest do
   alias UrFUAPI.AuthExceptions.WrongCredentialsError
   alias UrFUAPI.UBU.Auth
 
-  setup context do
-    if context[:integration] do
-      UrFUAPI.Credentials.fetch_from_env()
-    else
-      :ok
-    end
-  end
-
   describe "Real API" do
     @describetag :integration
+
+    setup do
+      UrFUAPI.Credentials.fetch_from_env()
+    end
 
     test "auths with valid credentials", %{username: username, password: password} do
       assert {:ok, _auth} = Auth.sign_in(username, password)
