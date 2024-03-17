@@ -46,7 +46,10 @@ defmodule UrFUAPI.UBU.Auth do
     cookies = Enum.join(tokens, ";")
 
     with {:ok, response} <- UBU.Client.request_urfu_sso(:get, [], [{"cookie", cookies}]) do
-      AuthHelpers.fetch_location(response)
+      case AuthHelpers.fetch_location(response) do
+        {:ok, _location} = ok -> ok
+        :error -> {:error, ServerResponseFormatError.exception(%{except: "location in response", got: response})}
+      end
     end
   end
 
