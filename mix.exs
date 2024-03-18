@@ -36,7 +36,7 @@ defmodule UrFUAPI.MixProject do
       {:exconstructor, github: "txssu/exconstructor"},
       {:typedstruct, "~> 0.5.2"},
       {:publicist, "1.1.0"},
-      {:patch, "~> 0.12.0", only: [:test]},
+      {:mimic, "~> 1.7", only: :test},
       {:credo, "~> 1.7.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.3", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.2", only: [:dev, :test], runtime: false},
