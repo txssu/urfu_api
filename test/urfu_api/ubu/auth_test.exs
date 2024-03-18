@@ -98,4 +98,29 @@ defmodule UrFUAPI.UBU.AuthTest do
       assert {:ok, %Auth.Token{}} = Auth.get_access_token("code", "username")
     end
   end
+
+  test "sign_in/2 returns token" do
+    tokens = ["token1", "token2"]
+    cookies = Enum.map(tokens, &{"set-cookie", &1})
+    url = "https://example.com?not_code=abc&code=abc"
+
+    patch(
+      UrFUAPI.UBU.Client,
+      :request_urfu_sso,
+      sequence([
+        {:ok, %{status: 300, headers: cookies}},
+        {:ok, %{headers: [{"location", url}]}}
+      ])
+    )
+
+    patch(
+      UrFUAPI.UBU.Client,
+      :request_ubu_code,
+      {:ok, %{headers: [{"location", url}]}}
+    )
+
+    patch(UrFUAPI.UBU.Client, :request_ubu_token, {:ok, %{headers: cookies}})
+
+    assert {:ok, %Auth.Token{}} = Auth.sign_in("username", "password")
+  end
 end
