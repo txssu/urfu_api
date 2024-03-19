@@ -2,8 +2,6 @@ defmodule UrFUAPI.UBU.AuthTest do
   use ExUnit.Case
   use Mimic.DSL
 
-  alias UrFUAPI.AuthExceptions.ServerResponseFormatError
-  alias UrFUAPI.AuthExceptions.WrongCredentialsError
   alias UrFUAPI.UBU.Auth
   alias UrFUAPI.UBU.Client
 
@@ -35,7 +33,7 @@ defmodule UrFUAPI.UBU.AuthTest do
         do: {:ok, %{status: 300, headers: [{"set-cookie", "token"}]}}
       )
 
-      assert {:error, %ServerResponseFormatError{}} = Auth.get_auth_tokens("username", "password")
+      assert {:error, :invalid_server_response} = Auth.get_auth_tokens("username", "password")
     end
 
     test "returns two tokens with valid credentials" do
@@ -52,7 +50,7 @@ defmodule UrFUAPI.UBU.AuthTest do
     test "returns error when no location in response" do
       expect(Client.request_urfu_sso(_method, _body, _headers), do: {:ok, %{headers: []}})
 
-      assert {:error, %ServerResponseFormatError{}} = Auth.get_auth_url(["token1", "token2"])
+      assert {:error, :invalid_server_response} = Auth.get_auth_url(["token1", "token2"])
     end
 
     test "returns auth url when good response" do
@@ -67,14 +65,14 @@ defmodule UrFUAPI.UBU.AuthTest do
     test "returns error when no location in response" do
       expect(Client.request_ubu_code(_url), do: {:ok, %{headers: []}})
 
-      assert {:error, %ServerResponseFormatError{}} = Auth.get_ubu_login_code("login_code")
+      assert {:error, :invalid_server_response} = Auth.get_ubu_login_code("login_code")
     end
 
     test "returns error when no code in response" do
       url = "https://example.com?not_code=abc"
       expect(Client.request_ubu_code(_url), do: {:ok, %{headers: [{"location", url}]}})
 
-      assert {:error, %ServerResponseFormatError{}} = Auth.get_ubu_login_code("login_code")
+      assert {:error, :invalid_server_response} = Auth.get_ubu_login_code("login_code")
     end
 
     test "returns ubu auth code when good response" do
@@ -90,7 +88,7 @@ defmodule UrFUAPI.UBU.AuthTest do
     test "returns error when wrong count of tokens" do
       expect(Client.request_ubu_token(_body), do: {:ok, %{headers: [{"set-cookie", "token"}]}})
 
-      assert {:error, %ServerResponseFormatError{}} = Auth.get_access_token("code", "username")
+      assert {:error, :invalid_server_response} = Auth.get_access_token("code", "username")
     end
 
     test "returns %Token{} when response is good" do

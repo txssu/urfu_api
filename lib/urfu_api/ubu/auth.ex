@@ -2,10 +2,12 @@ defmodule UrFUAPI.UBU.Auth do
   @moduledoc false
   use Publicist
 
-  alias UrFUAPI.AuthExceptions.ServerResponseFormatError
   alias UrFUAPI.AuthHelpers
   alias UrFUAPI.UBU
   alias UrFUAPI.UBU.Auth.Token
+  alias UrfuApi.Utils
+
+  require Logger
 
   @spec sign_in(String.t(), String.t()) :: {:ok, Token.t()} | {:error, String.t()}
   def sign_in(username, password) do
@@ -38,8 +40,15 @@ defmodule UrFUAPI.UBU.Auth do
 
   defp fetch_auth_cookies(response) do
     case AuthHelpers.fetch_cookies(response) do
-      [_c1, _c2] = cookies -> {:ok, cookies}
-      wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
+      [_c1, _c2] = cookies ->
+        {:ok, cookies}
+
+      _cookies ->
+        "request_urfu_sso(:post, ...)"
+        |> format_error(response)
+        |> Logger.error()
+
+        {:error, :invalid_server_response}
     end
   end
 
@@ -48,8 +57,15 @@ defmodule UrFUAPI.UBU.Auth do
 
     with {:ok, response} <- UBU.Client.request_urfu_sso(:get, [], [{"cookie", cookies}]) do
       case AuthHelpers.fetch_location(response) do
-        {:ok, _location} = ok -> ok
-        :error -> {:error, ServerResponseFormatError.exception(%{except: "location in response", got: response})}
+        {:ok, _location} = ok ->
+          ok
+
+        :error ->
+          "request_urfu_sso(:get, ...)"
+          |> format_error(response)
+          |> Logger.error()
+
+          {:error, :invalid_server_response}
       end
     end
   end
@@ -65,20 +81,29 @@ defmodule UrFUAPI.UBU.Auth do
       maybe_code = Enum.find_value(query_stream, &if(elem(&1, 0) == "code", do: elem(&1, 1)))
 
       case maybe_code do
-        nil -> {:error, ServerResponseFormatError.exception(%{except: "query with ubu code", got: response})}
-        code -> {:ok, code}
+        nil ->
+          Logger.error("UBU returns location without code.")
+
+          {:error, :invalid_server_response}
+
+        code ->
+          {:ok, code}
       end
     end
   end
 
   defp fetch_location_query(response) do
     case AuthHelpers.fetch_location(response) do
-      :error ->
-        {:error, ServerResponseFormatError.exception(%{except: "url to get ubu code", got: response})}
-
       {:ok, location} ->
         %{query: query} = URI.parse(location)
         {:ok, URI.query_decoder(query)}
+
+      :error ->
+        "request_ubu_code(...)"
+        |> format_error(response)
+        |> Logger.error()
+
+        {:error, :invalid_server_response}
     end
   end
 
@@ -92,9 +117,18 @@ defmodule UrFUAPI.UBU.Auth do
 
     with {:ok, response} <- UBU.Client.request_ubu_token(body) do
       case AuthHelpers.fetch_cookies(response) do
-        [_c1, _c2] = cookies -> {:ok, Token.new(cookies, username)}
-        cookies -> {:error, ServerResponseFormatError.exception(%{except: "two auth cookies", got: cookies})}
+        [_c1, _c2] = cookies ->
+          {:ok, Token.new(cookies, username)}
+
+        _cookies ->
+          "request_ubu_token(...)"
+          |> format_error(response)
+          |> Logger.error()
+
+          {:error, :invalid_server_response}
       end
     end
   end
+
+  defp format_error(method, response), do: Utils.invalid_response_format_error("UBU.Client", method, response)
 end

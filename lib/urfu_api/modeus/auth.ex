@@ -1,9 +1,11 @@
 defmodule UrFUAPI.Modeus.Auth do
   @moduledoc false
-  alias UrFUAPI.AuthExceptions.ServerResponseFormatError
   alias UrFUAPI.AuthHelpers
   alias UrFUAPI.Modeus
   alias UrFUAPI.Modeus.Auth.Token
+  alias UrfuApi.Utils
+
+  require Logger
 
   defmodule AuthProcess do
     @moduledoc false
@@ -32,8 +34,15 @@ defmodule UrFUAPI.Modeus.Auth do
   defp get_relay_data(%AuthProcess{} = process) do
     with {:ok, response} <- Modeus.Client.request_relay_data() do
       case AuthHelpers.fetch_location(response) do
-        :error -> {:error, ServerResponseFormatError.exception(%{except: "location in response", got: response})}
-        {:ok, url} -> insert_relay_data(process, url)
+        {:ok, url} ->
+          insert_relay_data(process, url)
+
+        :error ->
+          "request_relay_data(...)"
+          |> format_error(response)
+          |> Logger.error()
+
+          {:error, :invalid_server_response}
       end
     end
   end
@@ -57,8 +66,12 @@ defmodule UrFUAPI.Modeus.Auth do
       |> URI.decode_query()
 
     case Map.fetch(query, "RelayState") do
-      :error -> {:error, ServerResponseFormatError.exception(%{except: "RelayState in query", got: query})}
-      {:ok, _relay_state} = ok -> ok
+      {:ok, _relay_state} = ok ->
+        ok
+
+      :error ->
+        Logger.error("Modeus returns relay data, but without RelayState in it.")
+        {:error, :invalid_server_response}
     end
   end
 
@@ -85,8 +98,15 @@ defmodule UrFUAPI.Modeus.Auth do
 
   defp fetch_auth_cookies(response) do
     case AuthHelpers.fetch_cookies(response) do
-      [_c1, _c2] = cookies -> {:ok, cookies}
-      wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "two cookies", got: wrong_data})}
+      [_c1, _c2] = cookies ->
+        {:ok, cookies}
+
+      _wrong_data ->
+        "request_saml_tokens(...)"
+        |> format_error(response)
+        |> Logger.error()
+
+        {:error, :invalid_server_response}
     end
   end
 
@@ -116,8 +136,12 @@ defmodule UrFUAPI.Modeus.Auth do
 
   defp fetch_saml_response(document) do
     case Floki.attribute(document, "input[name=SAMLResponse]", "value") do
-      [saml_response] -> {:ok, saml_response}
-      _wrong_data -> {:error, ServerResponseFormatError.exception(%{except: "saml response in document", got: document})}
+      [saml_response] ->
+        {:ok, saml_response}
+
+      _wrong_data ->
+        Logger.error("Modeus returns document, but without SAMLResponse:\n#{Floki.raw_html(document)}")
+        {:error, :invalid_server_response}
     end
   end
 
@@ -151,8 +175,15 @@ defmodule UrFUAPI.Modeus.Auth do
   defp request_auth_link(body) do
     with {:ok, response} <- Modeus.Client.request_auth_link(body) do
       case AuthHelpers.fetch_location(response) do
-        :error -> {:error, ServerResponseFormatError.exception(%{except: "auth link in location", got: response})}
-        {:ok, _auth_link} = ok -> ok
+        {:ok, _auth_link} = ok ->
+          ok
+
+        :error ->
+          "request_auth_link(...)"
+          |> format_error(response)
+          |> Logger.error()
+
+          {:error, :invalid_server_response}
       end
     end
   end
@@ -160,8 +191,15 @@ defmodule UrFUAPI.Modeus.Auth do
   defp auth_with_url(url) do
     with {:ok, response} <- Modeus.Client.auth_with_url(url) do
       case AuthHelpers.fetch_location(response) do
-        :error -> {:error, ServerResponseFormatError.exception(%{except: "link with auth token", got: response})}
-        {:ok, _auth_link} = ok -> ok
+        {:ok, _auth_link} = ok ->
+          ok
+
+        :error ->
+          "auth_with_url(...)"
+          |> format_error(response)
+          |> Logger.error()
+
+          {:error, :invalid_server_response}
       end
     end
   end
@@ -174,7 +212,10 @@ defmodule UrFUAPI.Modeus.Auth do
     parse_auth_url(rest)
   end
 
-  defp parse_auth_url(not_auth_url) do
-    {:error, ServerResponseFormatError.exception(%{except: "auth url with token", got: not_auth_url})}
+  defp parse_auth_url(_empty_string) do
+    Logger.error("Modeus returns auth_url, but without commented query.")
+    {:error, :invalid_server_response}
   end
+
+  defp format_error(method, response), do: Utils.invalid_response_format_error("IStudent.Client", method, response)
 end
