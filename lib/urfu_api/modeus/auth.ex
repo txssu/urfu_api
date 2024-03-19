@@ -1,7 +1,6 @@
 defmodule UrFUAPI.Modeus.Auth do
   @moduledoc false
   alias UrFUAPI.AuthExceptions.ServerResponseFormatError
-  alias UrFUAPI.AuthExceptions.WrongCredentialsError
   alias UrFUAPI.AuthHelpers
   alias UrFUAPI.Modeus
   alias UrFUAPI.Modeus.Auth.Token
@@ -80,7 +79,7 @@ defmodule UrFUAPI.Modeus.Auth do
   defp ensure_auth_ok(response) do
     case AuthHelpers.ensure_redirect(response) do
       {:ok, _response} = ok -> ok
-      :error -> {:error, WrongCredentialsError.exception(nil)}
+      :error -> {:error, :wrong_credentials}
     end
   end
 

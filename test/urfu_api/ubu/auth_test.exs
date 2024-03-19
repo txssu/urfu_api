@@ -27,7 +27,7 @@ defmodule UrFUAPI.UBU.AuthTest do
     test "returns credentials error when not redirected" do
       expect(Client.request_urfu_sso(_method, _body, _client), do: {:ok, %{status: 200}})
 
-      assert {:error, %WrongCredentialsError{}} = Auth.get_auth_tokens("username", "password")
+      assert {:error, :wrong_credentials} = Auth.get_auth_tokens("username", "password")
     end
 
     test "returns wrong count of cookies" do

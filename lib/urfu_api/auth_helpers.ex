@@ -1,8 +1,6 @@
 defmodule UrFUAPI.AuthHelpers do
   @moduledoc false
 
-  alias UrFUAPI.AuthExceptions.WrongCredentialsError
-
   @spec ensure_redirect(Finch.Response.t()) :: {:ok, Finch.Response.t()} | :error
   def ensure_redirect(response)
 
@@ -43,7 +41,7 @@ defmodule UrFUAPI.AuthHelpers do
   @spec ensure_correct_credentials(Finch.Response.t()) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
   def ensure_correct_credentials(response) do
     case ensure_redirect(response) do
-      :error -> {:error, WrongCredentialsError.exception(nil)}
+      :error -> {:error, :wrong_credentials}
       {:ok, _response} = ok -> ok
     end
   end
