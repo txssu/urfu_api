@@ -32,7 +32,7 @@ defmodule UrFUAPI.MixProject do
       {:joken, "~> 2.5"},
       {:jason, ">= 1.0.0"},
       {:finch, "~> 0.18"},
-      {:floki, "~> 0.35.0"},
+      {:floki, "~> 0.36.2"},
       {:exconstructor, github: "txssu/exconstructor"},
       {:typedstruct, "~> 0.5.2"},
       {:publicist, "1.1.0"},
