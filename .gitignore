@@ -31,3 +31,7 @@ urfu_api-*.tar
 # Nix
 .nix-*
 .direnv
+
+# Dialyzer
+/priv/plts/*.plt
+/priv/plts/*.plt.hash
