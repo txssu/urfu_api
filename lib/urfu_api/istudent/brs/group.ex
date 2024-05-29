@@ -1,16 +1,28 @@
-defmodule UrFUAPI.IStudent.BRS.Subject do
+defmodule UrFUAPI.IStudent.BRS.Group do
   @moduledoc false
+
   use TypedStruct
   use ExConstructor
 
+  import UrFUAPI.StructUtils
+
+  defmodule Year do
+    @moduledoc false
+
+    use TypedStruct
+    use ExConstructor
+
+    typedstruct enforce: true do
+      field :year, integer()
+      field :semesters, [integer()]
+    end
+  end
+
   typedstruct enforce: true do
-    field :id, integer()
     field :group_id, String.t()
     field :group_title, String.t()
-    field :score, integer()
-    field :semester, String.t()
-    field :summaryTitle, String.t()
-    field :title, String.t()
+
+    field :years, [Year.t()]
   end
 
   @spec new(ExConstructor.map_or_kwlist()) :: t()
@@ -18,5 +30,6 @@ defmodule UrFUAPI.IStudent.BRS.Subject do
     fields
     |> Enum.map(fn {key, value} -> {Macro.underscore(key), value} end)
     |> super()
+    |> cast_many(:years, Year)
   end
 end

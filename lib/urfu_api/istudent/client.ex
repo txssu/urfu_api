@@ -1,47 +1,46 @@
 defmodule UrFUAPI.IStudent.Client do
   @moduledoc false
 
-  alias UrFUAPI.IStudent
+  def request_access_token(username, password) do
+    headers = [{"content-type", "application/x-www-form-urlencoded"}]
 
-  @url "https://sso.urfu.ru/adfs/OAuth2/authorize?resource=https%3A%2F%2Fistudent.urfu.ru&type=web_server&client_id=https%3A%2F%2Fistudent.urfu.ru&redirect_uri=https%3A%2F%2Fistudent.urfu.ru%3Fauth&response_type=code&scope="
+    body = URI.encode_query(%{client_id: "urfu_study", grant_type: "password", username: username, password: password})
 
-  @spec request_urfu_sso(Finch.Request.method(), Enumerable.t(), Finch.Request.headers()) ::
-          {:ok, Finch.Response.t()} | {:error, Exception.t()}
-  def request_urfu_sso(method, body, client_headers) do
-    headers = [{"content-type", "application/x-www-form-urlencoded"} | client_headers]
-
-    encoded_body = URI.encode_query(body)
-
-    UrFUAPI.Client.request(method, @url, headers, encoded_body)
+    :post
+    |> UrFUAPI.Client.request("https://keys.urfu.ru/auth/realms/urfu-lk/protocol/openid-connect/token", headers, body)
+    |> handle_response()
   end
 
-  @spec request_istudent_token(Finch.Request.url()) :: {:ok, Finch.Response.t()} | {:error, Exception.t()}
-  def request_istudent_token(url) do
-    UrFUAPI.Client.request(:get, url)
+  def request_brs_filters(token) do
+    :get
+    |> UrFUAPI.Client.request("https://urfu-study-api.my1.urfu.ru/api/brs/filters?", headers_with_token(token))
+    |> handle_response()
   end
 
-  @brs_url "https://istudent.urfu.ru/s/http-urfu-ru-ru-students-study-brs"
-
-  @spec request_brs(IStudent.Auth.Token.t(), discipline: integer()) :: {:ok, binary()} | {:error, Exception.t()}
-  def request_brs(token, options \\ []) do
-    path =
-      if discipline_id = Keyword.get(options, :discipline) do
-        "/discipline?discipline_id=#{discipline_id}"
-      else
-        "/"
-      end
-
-    url = @brs_url <> path
-
-    with {:ok, %{body: body}} <- UrFUAPI.Client.request(:get, url, headers_with_token(token)) do
-      {:ok, body}
-    end
+  def request_subjects_list(token, group_id, year, semester) do
+    :get
+    |> UrFUAPI.Client.request(
+      "https://urfu-study-api.my1.urfu.ru/api/brs/disciplines/#{year}/#{semester}?groupId=#{group_id}",
+      headers_with_token(token)
+    )
+    |> handle_response()
   end
+
+  def request_subject(token, group_id, year, semester, subject_id) do
+    :get
+    |> UrFUAPI.Client.request(
+      "https://urfu-study-api.my1.urfu.ru/api/brs/disciplines/#{year}/#{semester}/#{subject_id}?groupId=#{group_id}",
+      headers_with_token(token)
+    )
+    |> handle_response()
+  end
+
+  def handle_response({:ok, %{body: body}}), do: Jason.decode(body)
+  def handle_response(error), do: error
 
   defp headers_with_token(%{access_token: token}) do
     [
-      {"content-type", "application/x-www-form-urlencoded"},
-      {"cookie", token}
+      {"authorization", "Bearer #{token}"}
     ]
   end
 end

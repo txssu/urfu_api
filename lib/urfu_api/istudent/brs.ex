@@ -1,177 +1,28 @@
 defmodule UrFUAPI.IStudent.BRS do
   @moduledoc false
   alias UrFUAPI.IStudent.Auth.Token
+  alias UrFUAPI.IStudent.BRS.FiltersList
   alias UrFUAPI.IStudent.BRS.Subject
-  alias UrFUAPI.IStudent.BRS.SubjectScore
+  alias UrFUAPI.IStudent.BRS.SubjectInfo
   alias UrFUAPI.IStudent.Client
 
-  @spec get_subjects(Token.t()) :: {:ok, [Subject.t()]} | {:error, Exception.t()}
-  def get_subjects(auth) do
-    with {:ok, response} <- Client.request_brs(auth) do
-      parse_subjects(response)
+  @spec get_filters(Token.t()) :: {:ok, FiltersList.t()} | {:error, Exception.t()}
+  def get_filters(auth) do
+    with {:ok, response} <- Client.request_brs_filters(auth) do
+      {:ok, FiltersList.new(response)}
     end
   end
 
-  defp parse_subjects(body) do
-    with {:ok, document} <- parse_document(body),
-         {:ok, html_subjects} <- find_disciplines(document) do
-      {:ok,
-       Enum.reduce(html_subjects, [], fn
-         _html_subject, {:error, _error} = error ->
-           error
-
-         html_subject, acc ->
-           with {:ok, subject} <- parse_subject(html_subject) do
-             [subject | acc]
-           end
-       end)}
+  @spec get_subjects(Token.t(), String.t(), integer(), integer()) :: {:ok, [Subject.t()]} | {:error, Exception.t()}
+  def get_subjects(auth, group_id, year, semester) do
+    with {:ok, response} <- Client.request_subjects_list(auth, group_id, year, semester) do
+      {:ok, Enum.map(response, &Subject.new/1)}
     end
   end
 
-  defp find_disciplines(document) do
-    case Floki.find(document, "a.rating-discipline") do
-      [] -> {:error, Floki.ParseError.exception("can't find a.rating-discipline")}
-      html_subjects -> {:ok, html_subjects}
-    end
-  end
-
-  defp parse_subject(html_subject) do
-    with {:ok, id} <- parse_subject_id(html_subject),
-         {:ok, name} <- parse_subject_name(html_subject),
-         {:ok, total} <- parse_subject_total(html_subject),
-         {:ok, grade} <- parse_subject_grade(html_subject) do
-      {:ok, Subject.new(id: id, name: name, total: total, grade: grade)}
-    end
-  end
-
-  defp parse_subject_id(html_subject) do
-    case Floki.attribute(html_subject, "id") do
-      [elem] ->
-        case Integer.parse(elem) do
-          {number, ""} -> {:ok, number}
-          _error -> {:error, Floki.ParseError.exception(".td-0 is not an integer")}
-        end
-
-      _error ->
-        {:error, Floki.ParseError.exception("can't find .td-0 for name")}
-    end
-  end
-
-  defp parse_subject_name(html_subject) do
-    case Floki.find(html_subject, ".td-0") do
-      [elem] -> {:ok, unpack_text(elem)}
-      _error -> {:error, Floki.ParseError.exception("can't find .td-0 for name")}
-    end
-  end
-
-  defp parse_subject_total(html_subject) do
-    case Floki.find(html_subject, ".td-1") do
-      [elem] ->
-        text = unpack_text(elem)
-
-        case Float.parse(text) do
-          {number, ""} -> {:ok, number}
-          _error -> {:error, Floki.ParseError.exception(".td-1 total is not a float")}
-        end
-
-      _error ->
-        {:error, Floki.ParseError.exception("can't find .td-1 for total")}
-    end
-  end
-
-  defp parse_subject_grade(html_subject) do
-    case Floki.find(html_subject, ".td-2") do
-      [elem] -> {:ok, unpack_text(elem)}
-      _error -> {:error, Floki.ParseError.exception("can't find .td-2 for grade")}
-    end
-  end
-
-  @spec preload_subject_scores(Token.t(), Subject.t()) :: {:ok, Subject.t()} | {:error, term()}
-  def preload_subject_scores(auth, %Subject{id: object_id} = subject) do
-    with {:ok, response} <- Client.request_brs(auth, discipline: object_id),
-         {:ok, scores} <- parse_subject_scores(response) do
-      {:ok, %{subject | scores: scores}}
-    end
-  end
-
-  defp parse_subject_scores(body) do
-    with {:ok, document} <- parse_document(body),
-         {:ok, html_subject_scores} <- find_brs_containers(document) do
-      {:ok,
-       Enum.reduce(html_subject_scores, [], fn
-         _html_subject, {:error, _error} = error ->
-           error
-
-         html_subject, acc ->
-           with {:ok, subject_score} <- parse_subject_score(html_subject) do
-             [subject_score | acc]
-           end
-       end)}
-    end
-  end
-
-  defp find_brs_containers(document) do
-    case Floki.find(document, ".brs-countainer") do
-      [] -> {:error, Floki.ParseError.exception("can't find .brs-countainer in #{document}")}
-      html_subject_scores -> {:ok, html_subject_scores}
-    end
-  end
-
-  defp parse_subject_score(html_element) do
-    html_subject_score = Floki.find(html_element, ".brs-h4")
-
-    with {:ok, name} <- parse_subject_score_name(html_subject_score),
-         {:ok, raw} <- parse_subject_score_raw(html_subject_score),
-         {:ok, multiplier} <- parse_subject_score_multiplier(html_subject_score),
-         {:ok, total} <- parse_subject_score_total(html_subject_score) do
-      {:ok, SubjectScore.new(name: name, raw: raw, multiplier: multiplier, total: total)}
-    end
-  end
-
-  defp parse_subject_score_name(html_subject_score) do
-    case Floki.attribute(html_subject_score, "title") do
-      [title] -> {:ok, String.capitalize(title)}
-      _no_title -> {:error, Floki.ParseError.exception("can't find title attribute for score name")}
-    end
-  end
-
-  defp parse_subject_score_raw(html_subject_score) do
-    parse_subject_score(html_subject_score, ".brs-blue")
-  end
-
-  defp parse_subject_score_multiplier(html_subject_score) do
-    parse_subject_score(html_subject_score, ".brs-gray")
-  end
-
-  defp parse_subject_score_total(html_subject_score) do
-    parse_subject_score(html_subject_score, ".brs-green")
-  end
-
-  defp parse_subject_score(html_subject_score, class) do
-    case Floki.find(html_subject_score, class) do
-      [html_score] ->
-        score_raw = html_score |> unpack_text() |> Float.parse()
-
-        case score_raw do
-          {number, _score} -> {:ok, number}
-          _error -> {:error, Floki.ParseError.exception("#{class} score is not a float but #{score_raw}")}
-        end
-
-      _no_title ->
-        {:error, Floki.ParseError.exception("can't find #{class} for score")}
-    end
-  end
-
-  defp unpack_text(html_tree) do
-    html_tree
-    |> Floki.text()
-    |> String.trim()
-  end
-
-  defp parse_document(body) do
-    case Floki.parse_document(body) do
-      {:ok, _document} = ok -> ok
-      {:error, reason} -> {:error, Floki.ParseError.exception(reason)}
+  def get_subject(auth, group_id, year, semester, subject_id) do
+    with {:ok, response} <- Client.request_subject(auth, group_id, year, semester, subject_id) do
+      {:ok, SubjectInfo.new(response)}
     end
   end
 end

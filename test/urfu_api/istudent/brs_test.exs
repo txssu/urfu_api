@@ -17,17 +17,19 @@ defmodule UrFUAPI.IStudent.BRSTest do
   end
 
   @tag :integration
-  test "get brs subjects", %{auth: auth} do
-    assert {:ok, subjects} = BRS.get_subjects(auth)
-    assert %BRS.Subject{} = hd(subjects)
-  end
+  test "integration test passes", %{auth: auth} do
+    assert {:ok, filters} = BRS.get_filters(auth)
 
-  @tag :integration
-  test "update ", %{auth: auth} do
-    {:ok, subjects} = BRS.get_subjects(auth)
-    subject = hd(subjects)
+    group = List.last(filters.groups)
+    group_id = group.group_id
+    year_info = List.last(group.years)
+    year = year_info.year
+    semester = List.last(year_info.semesters)
 
-    {:ok, preloaded_subject} = BRS.preload_subject_scores(auth, subject)
-    assert preloaded_subject.scores != subject.scores
+    assert {:ok, subjects} = BRS.get_subjects(auth, group_id, year, semester)
+
+    subject_id = subjects |> List.last() |> Map.fetch!(:id)
+
+    assert {:ok, _subject} = BRS.get_subject(auth, group_id, year, semester, subject_id)
   end
 end
