@@ -1,5 +1,7 @@
 defmodule UrFUAPI.StructUtils do
   @moduledoc false
+
+  @spec cast_field(map(), Map.key(), module()) :: map()
   def cast_field(map, field, module) when is_atom(module) do
     case Map.fetch!(map, field) do
       nil -> map
@@ -7,6 +9,7 @@ defmodule UrFUAPI.StructUtils do
     end
   end
 
+  @spec cast_many(map(), Map.key(), module()) :: map()
   def cast_many(map, field, module) when is_atom(module) do
     case Map.fetch!(map, field) do
       nil -> map

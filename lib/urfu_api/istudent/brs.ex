@@ -13,13 +13,15 @@ defmodule UrFUAPI.IStudent.BRS do
     end
   end
 
-  @spec get_subjects(Token.t(), String.t(), integer(), integer()) :: {:ok, [Subject.t()]} | {:error, Exception.t()}
+  @spec get_subjects(Token.t(), String.t(), integer(), String.t()) :: {:ok, [Subject.t()]} | {:error, Exception.t()}
   def get_subjects(auth, group_id, year, semester) do
     with {:ok, response} <- Client.request_subjects_list(auth, group_id, year, semester) do
       {:ok, Enum.map(response, &Subject.new/1)}
     end
   end
 
+  @spec get_subject(Token.t(), String.t(), integer(), String.t(), String.t()) ::
+          {:ok, Subject.t()} | {:error, Exception.t()}
   def get_subject(auth, group_id, year, semester, subject_id) do
     with {:ok, response} <- Client.request_subject(auth, group_id, year, semester, subject_id) do
       {:ok, SubjectInfo.new(response)}
