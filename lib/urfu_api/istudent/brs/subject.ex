@@ -15,8 +15,6 @@ defmodule UrFUAPI.IStudent.BRS.Subject do
 
   @spec new(ExConstructor.map_or_kwlist()) :: t()
   def new(fields) do
-    fields
-    |> Enum.map(fn {key, value} -> {Macro.underscore(key), value} end)
-    |> super()
+    super(fields)
   end
 end

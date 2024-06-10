@@ -21,7 +21,6 @@ defmodule UrFUAPI.IStudent.BRS.Attestation do
     @spec new(ExConstructor.map_or_kwlist()) :: t()
     def new(fields) do
       fields
-      |> Enum.map(fn {key, value} -> {Macro.underscore(key), value} end)
       |> super()
     end
   end
@@ -38,7 +37,6 @@ defmodule UrFUAPI.IStudent.BRS.Attestation do
   @spec new(ExConstructor.map_or_kwlist()) :: t()
   def new(fields) do
     fields
-    |> Enum.map(fn {key, value} -> {Macro.underscore(key), value} end)
     |> super()
     |> cast_many(:controls, Control)
   end

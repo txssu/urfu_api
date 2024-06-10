@@ -44,7 +44,6 @@ defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Event do
   @spec new(ExConstructor.map_or_kwlist()) :: t()
   def new(fields) do
     fields
-    |> Map.put(:name_short, fields["nameShort"])
     |> super()
     |> put_datetime(:end, false)
     |> put_datetime(:ends_at)

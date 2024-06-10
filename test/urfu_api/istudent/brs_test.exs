@@ -26,7 +26,7 @@ defmodule UrFUAPI.IStudent.BRSTest do
     year = year_info.year
     semester = List.last(year_info.semesters)
 
-    assert {:ok, subjects} = BRS.get_subjects(auth, group_id, year, semester)
+    assert {:ok, subjects} = BRS.get_subjects(auth, group_id, year, semester) |> dbg()
 
     subject_id = subjects |> List.last() |> Map.fetch!(:id)
 
