@@ -1,7 +1,7 @@
 defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Event do
   @moduledoc false
   use TypedStruct
-  use ExConstructor, :do_new
+  use ExConstructor
 
   defmodule HoldingStatus do
     @moduledoc false
@@ -29,7 +29,7 @@ defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Event do
     field :id, String.t()
     field :lesson_template_id, String.t()
     field :name, String.t()
-    field :nameShort, String.t()
+    field :name_short, String.t()
 
     field :start, DateTime.t()
     field :starts_at, DateTime.t()
@@ -44,7 +44,8 @@ defmodule UrFUAPI.Modeus.Schedule.ScheduleData.Event do
   @spec new(ExConstructor.map_or_kwlist()) :: t()
   def new(fields) do
     fields
-    |> do_new()
+    |> Map.put(:name_short, fields["nameShort"])
+    |> super()
     |> put_datetime(:end, false)
     |> put_datetime(:ends_at)
     |> put_datetime(:ends_at_local)

@@ -9,7 +9,7 @@ defmodule UrFUAPI.IStudent.BRS.Subject do
     field :group_title, String.t()
     field :score, integer()
     field :semester, String.t()
-    field :summaryTitle, String.t()
+    field :summary_title, String.t()
     field :title, String.t()
   end
 
