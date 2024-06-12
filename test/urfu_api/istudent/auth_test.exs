@@ -48,12 +48,13 @@ defmodule UrFUAPI.IStudent.AuthTest do
     test "returns ok on success" do
       username = "some-username"
       access_token = "good-token"
+      expires_in = 100
 
       expect(Client.request_access_token(_username, _password),
-        do: {:ok, %{"access_token" => access_token}}
+        do: {:ok, %{"access_token" => access_token, "expires_in" => expires_in}}
       )
 
-      assert {:ok, %Token{access_token: access_token, username: username}} == Auth.sign_in(username, "password")
+      assert {:ok, %Token{access_token: access_token, username: username, expires_in: expires_in}} == Auth.sign_in(username, "password")
     end
   end
 end
