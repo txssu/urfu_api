@@ -54,7 +54,8 @@ defmodule UrFUAPI.IStudent.AuthTest do
         do: {:ok, %{"access_token" => access_token, "expires_in" => expires_in}}
       )
 
-      assert {:ok, %Token{access_token: access_token, username: username, expires_in: expires_in}} == Auth.sign_in(username, "password")
+      assert {:ok, %Token{access_token: access_token, username: username, expires_in: expires_in}} ==
+               Auth.sign_in(username, "password")
     end
   end
 end

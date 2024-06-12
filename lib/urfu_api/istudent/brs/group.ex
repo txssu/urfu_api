@@ -28,7 +28,7 @@ defmodule UrFUAPI.IStudent.BRS.Group do
   @spec new(ExConstructor.map_or_kwlist()) :: t()
   def new(fields) do
     fields
-    |> Enum.map(fn {key, value} -> {(key), value} end)
+    |> Enum.map(fn {key, value} -> {key, value} end)
     |> super()
     |> cast_many(:years, Year)
   end

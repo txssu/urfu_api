@@ -20,8 +20,7 @@ defmodule UrFUAPI.IStudent.BRS.Attestation do
 
     @spec new(ExConstructor.map_or_kwlist()) :: t()
     def new(fields) do
-      fields
-      |> super()
+      super(fields)
     end
   end
 
