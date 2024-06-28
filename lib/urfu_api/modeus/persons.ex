@@ -3,7 +3,7 @@ defmodule UrFUAPI.Modeus.Persons do
   alias UrFUAPI.Modeus.Auth.Token
   alias UrFUAPI.Modeus.Client
 
-  @spec search(Token.t(), map()) :: [Person.t()]
+  @spec search(Token.t(), map()) :: {:ok, [term()]} | {:error, any()}
   def search(auth, params) do
     body = Map.merge(%{"sort" => "+fullName", "size" => 10, "page" => 0}, params)
 

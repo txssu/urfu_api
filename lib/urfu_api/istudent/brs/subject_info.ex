@@ -14,7 +14,7 @@ defmodule UrFUAPI.IStudent.BRS.SubjectInfo do
 
     typedstruct do
       field :mark, String.t()
-      field :score, integer()
+      field :score, number()
     end
   end
 
@@ -22,7 +22,7 @@ defmodule UrFUAPI.IStudent.BRS.SubjectInfo do
     field :id, String.t()
 
     field :title, String.t()
-    field :edu_year, integer()
+    field :edu_year, number()
     field :semester, String.t()
     field :teachers, [String.t()]
 

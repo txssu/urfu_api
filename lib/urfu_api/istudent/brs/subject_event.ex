@@ -8,10 +8,10 @@ defmodule UrFUAPI.IStudent.BRS.SubjectEvent do
   alias UrFUAPI.IStudent.BRS.Attestation
 
   typedstruct enforce: true do
-    field :score_with_factor, integer()
-    field :score_without_factor, integer()
+    field :score_with_factor, number()
+    field :score_without_factor, number()
     field :test_before_exam, boolean()
-    field :total_factor, float()
+    field :total_factor, number()
     field :type, String.t()
     field :type_title, String.t()
 

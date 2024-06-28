@@ -4,10 +4,10 @@ defmodule UrFUAPI.IStudent.BRS.Subject do
   use ExConstructor
 
   typedstruct enforce: true do
-    field :id, integer()
+    field :id, String.t()
     field :group_id, String.t()
     field :group_title, String.t()
-    field :score, integer()
+    field :score, number()
     field :semester, String.t()
     field :summary_title, String.t()
     field :title, String.t()

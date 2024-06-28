@@ -21,7 +21,7 @@ defmodule UrFUAPI.IStudent.BRS do
   end
 
   @spec get_subject(Token.t(), String.t(), integer(), String.t(), String.t()) ::
-          {:ok, Subject.t()} | {:error, Exception.t()}
+          {:ok, SubjectInfo.t()} | {:error, Exception.t()}
   def get_subject(auth, group_id, year, semester, subject_id) do
     with {:ok, response} <- Client.request_subject(auth, group_id, year, semester, subject_id) do
       {:ok, SubjectInfo.new(response)}
