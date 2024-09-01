@@ -33,7 +33,7 @@ defmodule UrFUAPI.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:tz, "~> 0.26.5"},
+      {:tz, "~> 0.27.1"},
       {:joken, "~> 2.5"},
       {:jason, ">= 1.0.0"},
       {:finch, "~> 0.18"},
