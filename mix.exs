@@ -45,7 +45,7 @@ defmodule UrFUAPI.MixProject do
       {:credo, "~> 1.7.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.3", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.2", only: [:dev, :test], runtime: false},
-      {:styler, "~> 0.11.9", only: [:dev, :test], runtime: false}
+      {:styler, "~> 1.1.1", only: [:dev, :test], runtime: false}
     ]
   end
 
